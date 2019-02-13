@@ -110,6 +110,24 @@ cleaned_artists['birth_date'] = cleaned_artists['name'].apply(get_birth_date_fro
 cleaned_artists['death_date'] = cleaned_artists['name'].apply(get_death_date_from_source)
 # print(cleaned_artists.head(15))
 
-# d) TODO
+# d) Artist deduplication
 
-# e) TODO
+# Keep only relevant rows and rename columns
+df_artists = cleaned_artists[['cleaned_name', 'birth_date', 'death_date']]
+df_artists.columns = ['artist', 'birth', 'death']
+
+# Get counts for artist appearance and remove redundancy
+gp = df_artists.groupby(['artist', 'birth', 'death']).size().reset_index(name='count')
+# print(gp.tail(50))
+
+# e) Write dataframe to CleanedArtist table
+
+dic = gp.to_dict(orient='records')
+CleanedArtist.delete().execute()
+with sqlite_db.atomic():
+    for batch in chunked(dic, 100):
+        CleanedArtist.insert_many(batch).execute()
+
+print(CleanedArtist.select().count())
+query = CleanedArtist.select()
+print(list(query.dicts())[0])
