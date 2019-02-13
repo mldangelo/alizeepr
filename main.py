@@ -39,11 +39,76 @@ print('Number of rows in SourceArtist: {}'.format(SourceArtist.select().count())
 # print(list(query.dicts())[0])
 
 ### Part 2
-# a) TODO
+# a) Query name, birth and death date
+query = SourceArtist.select(SourceArtist.artist, SourceArtist.birth, SourceArtist.death)
+artists = pd.DataFrame(list(query.dicts()))
+#print(artists.head(100))
 
-# b) TODO
+# b) Attempt to get cleaned names
 
-# c) TODO
+
+def get_name_from_source(name):
+    # Get two first words of the field
+    return " ".join(name.split(' ')[0:2])
+
+
+def remove_punctuations(text):
+    punctuation_list = ['<', '>', ',', ';', '(', ')', '%', '*']
+    for punctuation in punctuation_list:
+        text = text.replace(punctuation, ' ')
+    return text
+
+
+cleaned_artists = pd.DataFrame(columns=['artist', 'birth', 'death'])
+cleaned_artists['name'] = artists['artist']
+# Apply data cleaning on field name
+cleaned_artists['name_removed_punc'] = cleaned_artists['name'].apply(remove_punctuations)
+cleaned_artists['cleaned_name'] = cleaned_artists['name_removed_punc'].apply(get_name_from_source)
+# Remove rows where artist name is probably too short to be a real name
+cleaned_artists = cleaned_artists[cleaned_artists['cleaned_name'].map(len) > 2]
+print('Number of rows after name cleaning: {}'.format(len(cleaned_artists['cleaned_name'])))
+
+# c) Get dates from Source artist field
+
+
+def search_date_pattern(name):
+    # Look for patterns date-date (eg:1906-1987)
+    dates = re.search('\d{4}-\d{4}', name)
+    if dates is not None:
+        return dates.group(0).split('-')[0]
+    else:
+        return None
+
+
+def search_b_date_pattern(name):
+    # Look for patterns (eg: b. 1946)
+    birth_date = re.search('[bB]\. \d{4}', name)
+    if birth_date is not None:
+        return birth_date.group(0).split(' ')[1]
+    else:
+        return None
+
+
+def get_birth_date_from_source(name):
+    if search_b_date_pattern(name) is not None:
+        return search_b_date_pattern(name)
+    elif search_date_pattern(name) is not None:
+        return search_date_pattern(name)
+    else:
+        return None
+
+
+def get_death_date_from_source(name):
+    dates = re.search('\d{4}-\d{4}', name)
+    if dates is not None:
+        return dates.group(0).split('-')[1]
+    else:
+        return None
+
+
+cleaned_artists['birth_date'] = cleaned_artists['name'].apply(get_birth_date_from_source)
+cleaned_artists['death_date'] = cleaned_artists['name'].apply(get_death_date_from_source)
+# print(cleaned_artists.head(15))
 
 # d) TODO
 
