@@ -2,6 +2,7 @@ from os.path import join, realpath, dirname
 import pandas as pd
 from models import SourceArtist, CleanedArtist, sqlite_db
 from peewee import chunked
+import re
 
 artist_csv = join(dirname(realpath(__file__)), 'data/sothebys_artists.csv')
 
@@ -12,7 +13,7 @@ artist_csv = join(dirname(realpath(__file__)), 'data/sothebys_artists.csv')
 # Connection to the database
 sqlite_db.connect()
 # Delete content of the table in case it was not empty
-SourceArtist.delete().execute()
+# SourceArtist.delete().execute()
 # Create the tables from the models
 sqlite_db.create_tables([SourceArtist, CleanedArtist])
 

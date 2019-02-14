@@ -1,7 +1,9 @@
 from os.path import join, realpath, dirname
 from peewee import Model, TextField, DoubleField, DateTimeField, SqliteDatabase, IntegerField
 
-data_path = join(dirname(realpath(__file__)), '../data/artists.db')
+#data_path = join(dirname(realpath(__file__)), '../data/artists.db')
+data_path = join(dirname(realpath(__file__)), "data\\artists.db")
+print(data_path)
 sqlite_db = SqliteDatabase(data_path, pragmas={'journal_mode': 'wal'})
 
 class BaseModel(Model):
