@@ -132,3 +132,21 @@ with sqlite_db.atomic():
 print(CleanedArtist.select().count())
 query = CleanedArtist.select()
 print(list(query.dicts())[0])
+
+# Questions
+# Most common artists
+query = CleanedArtist.select(CleanedArtist.artist, CleanedArtist.count).order_by(CleanedArtist.count.desc()).limit(10)
+print('Most common artists: \n')
+for row in query.dicts():
+    print(row)
+
+# Artists born before 1900
+#query = CleanedArtist.select(CleanedArtist.artist).where(CleanedArtist.birth < 1900)
+#print('Number of artists born before 1900: {}'.format(len(list(query.dicts()))))
+
+# Unique artists
+query = CleanedArtist.select(CleanedArtist.artist).distinct()
+print('Number of unique artists: {}'.format(len(list(query.dicts()))))
+
+query = CleanedArtist.select().where(CleanedArtist.count == 220).distinct()
+print((list(query.dicts())))
